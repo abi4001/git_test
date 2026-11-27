@@ -5,14 +5,14 @@ from datetime import datetime
 from pathlib import Path
 
 # ---------- SET THESE ----------
-INPUT_DIR  = r"L:\oq_good"
-OUTPUT_DIR = r"L:\oq_good_updated"
+INPUT_DIR  = r"L:\OQ_date_time\oq_good_updated"
+OUTPUT_DIR = r"L:\OQ_date_time\oq_good_updated_1"
 SEED       = 42
 # # -------------------------------
 # 27th Oct 26 12:00:00 to 16:00:00-
 
 EXTS  = {".bmp", ".png", ".jpg", ".jpeg"}
-START = datetime(2026, 10, 26, 12, 00, 00)
+START = datetime(2026, 10, 27, 12, 00, 00)
 END   = datetime(2026, 10, 27, 16, 00, 00)
 
 k32 = ctypes.windll.kernel32
