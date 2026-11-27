@@ -1,18 +1,19 @@
-  
-import ctypes, random, shutil
+
+import ctypes, random, re, shutil
 from ctypes import wintypes as wt
 from datetime import datetime
 from pathlib import Path
 
 # ---------- SET THESE ----------
-INPUT_DIR  = r"L:\pq_defect"
-OUTPUT_DIR = r"L:\pq_defect_updated"
+INPUT_DIR  = r"L:\oq_good"
+OUTPUT_DIR = r"L:\oq_good_updated"
 SEED       = 42
-# -------------------------------
+# # -------------------------------
+# 27th Oct 26 12:00:00 to 16:00:00-
 
 EXTS  = {".bmp", ".png", ".jpg", ".jpeg"}
-START = datetime(2026, 10, 28, 17, 23, 58)
-END   = datetime(2026, 10, 28, 17, 40, 11)
+START = datetime(2026, 10, 26, 12, 00, 00)
+END   = datetime(2026, 10, 27, 16, 00, 00)
 
 k32 = ctypes.windll.kernel32
 k32.CreateFileW.restype = wt.HANDLE
@@ -34,6 +35,14 @@ def set_all_times(path, dt):
 def list_imgs(folder):
     return sorted(p for p in Path(folder).iterdir() if p.suffix.lower() in EXTS)
 
+def new_name(old_name, new_dt):
+    stamp = new_dt.strftime("%Y%m%d_%H%M%S")
+    # replace leading YYYYMMDD_HHMMSS with the new stamp, keep the rest (_xxxxxx_OK.bmp etc.)
+    if re.match(r"^\d{8}_\d{6}_", old_name):
+        return re.sub(r"^\d{8}_\d{6}_", stamp + "_", old_name)
+    # fallback: filename doesn't match the expected pattern, just prefix it
+    return f"{stamp}_{old_name}"
+
 def main():
     random.seed(SEED)
     files = list_imgs(INPUT_DIR)
@@ -50,12 +59,15 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
 
     for src, off in zip(files, offsets):
-        dst = out / src.name
-        shutil.copy2(src, dst)
         new_dt = datetime.fromtimestamp(START.timestamp() + off)
+        dst_name = new_name(src.name, new_dt)
+        dst = out / dst_name
+        if dst.exists():
+            dst = out / f"{dst.stem}_dup{dst.suffix}"
+        shutil.copy2(src, dst)
         set_all_times(dst, new_dt)
 
-    print(f"Done: {n} images copied to {out} with updated date/time")
+    print(f"Done: {n} images copied to {out} with updated date/time and filenames")
 
 if __name__ == "__main__":
     main()
